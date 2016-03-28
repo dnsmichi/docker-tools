@@ -1,8 +1,10 @@
 #!/bin/bash
 
-VM=default
+USE_PARALLELS=1
+VM=docker-parallels #modify for VirtualBox
 DOCKER_MACHINE=/usr/local/bin/docker-machine
 VBOXMANAGE=/Applications/VirtualBox.app/Contents/MacOS/VBoxManage
+PARALLELSMANAGE=/usr/local/bin/prlctl
 
 BLUE='\033[0;34m'
 GREEN='\033[0;32m'
@@ -23,23 +25,22 @@ if [ ! -f "${VBOXMANAGE}" ]; then
   exit 1
 fi
 
-"${VBOXMANAGE}" list vms | grep \""${VM}"\" &> /dev/null
-VM_EXISTS_CODE=$?
+if [ $USE_PARALLELS -eq 1 ]; then
+  "${PARALLELSMANAGE}" list | grep "${VM}" &> /dev/null
+  VM_EXISTS_CODE=$?
+else
+  "${VBOXMANAGE}" list vms | grep \""${VM}"\" &> /dev/null
+  VM_EXISTS_CODE=$?
+fi
 
 if [ $VM_EXISTS_CODE -eq 1 ]; then
   "${DOCKER_MACHINE}" rm -f "${VM}" &> /dev/null
   rm -rf ~/.docker/machine/machines/"${VM}"
-  #set proxy variables if they exists
-  if [ -n ${HTTP_PROXY+x} ]; then
-	PROXY_ENV="$PROXY_ENV --engine-env HTTP_PROXY=$HTTP_PROXY"
+  if [ $USE_PARALLELS -eq 1 ]; then
+    "${DOCKER_MACHINE}" create -d parallels --parallels-memory 2048 --parallels-disk-size 204800 --parallels-no-share "${VM}"
+  else
+    "${DOCKER_MACHINE}" create -d virtualbox --virtualbox-memory 2048 --virtualbox-disk-size 204800 "${VM}"
   fi
-  if [ -n ${HTTPS_PROXY+x} ]; then
-	PROXY_ENV="$PROXY_ENV --engine-env HTTPS_PROXY=$HTTPS_PROXY"
-  fi
-  if [ -n ${NO_PROXY+x} ]; then
-	PROXY_ENV="$PROXY_ENV --engine-env NO_PROXY=$NO_PROXY"
-  fi  
-  "${DOCKER_MACHINE}" create -d virtualbox $PROXY_ENV --virtualbox-memory 2048 --virtualbox-disk-size 204800 "${VM}"
 fi
 
 VM_STATUS="$(${DOCKER_MACHINE} status ${VM} 2>&1)"
