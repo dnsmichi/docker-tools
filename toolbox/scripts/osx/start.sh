@@ -20,15 +20,19 @@ if [ ! -f "${DOCKER_MACHINE}" ]; then
   exit 1
 fi
 
-if [ ! -f "${VBOXMANAGE}" ]; then
-  echo "VirtualBox is not installed. Please re-run the Toolbox Installer and try again."
-  exit 1
-fi
-
 if [ $USE_PARALLELS -eq 1 ]; then
+  if [ ! - f "${PARALLELSMANAGE}" ]; then
+    echo "Parallels is not installed. Please ensure to have Pro/Business installed."
+    exit 1
+  fi
   "${PARALLELSMANAGE}" list | grep "${VM}" &> /dev/null
   VM_EXISTS_CODE=$?
 else
+  if [ ! -f "${VBOXMANAGE}" ]; then
+    echo "VirtualBox is not installed. Please re-run the Toolbox Installer and try again."
+    exit 1
+  fi
+
   "${VBOXMANAGE}" list vms | grep \""${VM}"\" &> /dev/null
   VM_EXISTS_CODE=$?
 fi
