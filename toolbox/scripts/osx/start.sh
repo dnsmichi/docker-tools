@@ -21,7 +21,7 @@ if [ ! -f "${DOCKER_MACHINE}" ]; then
 fi
 
 if [ $USE_PARALLELS -eq 1 ]; then
-  if [ ! - f "${PARALLELSMANAGE}" ]; then
+  if [ ! -f "${PARALLELSMANAGE}" ]; then
     echo "Parallels is not installed. Please ensure to have Pro/Business installed."
     exit 1
   fi
