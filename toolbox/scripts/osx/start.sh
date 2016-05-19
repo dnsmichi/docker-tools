@@ -25,7 +25,7 @@ if [ $USE_PARALLELS -eq 1 ]; then
     echo "Parallels is not installed. Please ensure to have Pro/Business installed."
     exit 1
   fi
-  "${PARALLELSMANAGE}" list | grep "${VM}" &> /dev/null
+  "${PARALLELSMANAGE}" status "${VM}" &> /dev/null
   VM_EXISTS_CODE=$?
 else
   if [ ! -f "${VBOXMANAGE}" ]; then
@@ -37,7 +37,7 @@ else
   VM_EXISTS_CODE=$?
 fi
 
-if [ $VM_EXISTS_CODE -eq 1 ]; then
+if [ $VM_EXISTS_CODE -ne 0 ]; then
   "${DOCKER_MACHINE}" rm -f "${VM}" &> /dev/null
   rm -rf ~/.docker/machine/machines/"${VM}"
   if [ $USE_PARALLELS -eq 1 ]; then
